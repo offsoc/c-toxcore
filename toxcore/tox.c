@@ -18,6 +18,7 @@
 #include "DHT.h"
 #include "Messenger.h"
 #include "TCP_client.h"
+#include "TCP_server.h"
 #include "attributes.h"
 #include "ccompat.h"
 #include "crypto_core.h"
