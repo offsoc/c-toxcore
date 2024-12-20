@@ -676,8 +676,8 @@ bool gc_disconnect_from_group(const GC_Session *c, GC_Chat *chat);
  * Returns -1 if the group handler object or chat object is null.
  * Returns -2 if the Messenger friend connection fails to initialize.
  */
-non_null()
-int gc_rejoin_group(GC_Session *c, GC_Chat *chat);
+non_null(1, 2) nullable(3)
+int gc_rejoin_group(GC_Session *c, GC_Chat *chat, const uint8_t *passwd, uint16_t passwd_len);
 
 /** @brief Joins a group using the invite data received in a friend's group invite.
  *

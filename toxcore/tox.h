@@ -3717,11 +3717,14 @@ typedef enum Tox_Err_Group_Join {
 const char *tox_err_group_join_to_string(Tox_Err_Group_Join value);
 
 /**
- * Joins a group chat with specified Chat ID.
+ * Joins a group chat with specified Chat ID or reconnects to an existing group.
  *
  * This function creates a new group chat object, adds it to the chats array,
  * and sends a DHT announcement to find peers in the group associated with
  * chat_id. Once a peer has been found a join attempt will be initiated.
+ *
+ * If a group with the specified Chat ID already exists, this function will attempt
+ * to reconnect to the group.
  *
  * @param chat_id The Chat ID of the group you wish to join. This must be
  *   TOX_GROUP_CHAT_ID_SIZE bytes.
@@ -3827,6 +3830,8 @@ const char *tox_err_group_reconnect_to_string(Tox_Err_Group_Reconnect value);
  * @param group_number The group number of the group we wish to reconnect to.
  *
  * @return true on success.
+ *
+ * @deprecated Use `tox_group_join` instead.
  */
 bool tox_group_reconnect(Tox *tox, Tox_Group_Number group_number, Tox_Err_Group_Reconnect *error);
 

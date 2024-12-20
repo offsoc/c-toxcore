@@ -7733,10 +7733,52 @@ int gc_group_add(GC_Session *c, Group_Privacy_State privacy_state,
     return group_number;
 }
 
+int gc_rejoin_group(GC_Session *c, GC_Chat *chat, const uint8_t *passwd, uint16_t passwd_len)
+{
+    if (c == nullptr) {
+        LOGGER_ERROR(chat->log, "NULL group session pointer.");
+        return -1;
+    }
+
+    if (passwd != nullptr && passwd_len > 0) {
+        if (!set_gc_password_local(chat, passwd, passwd_len)) {
+            LOGGER_WARNING(chat->log, "Failed to set new password during reconnect.");
+        }
+    }
+
+    chat->time_connected = 0;
+
+    if (group_can_handle_packets(chat)) {
+        send_gc_self_exit(chat, nullptr, 0);
+    }
+
+    for (uint32_t i = 1; i < chat->numpeers; ++i) {
+        GC_Connection *gconn = get_gc_connection(chat, i);
+        assert(gconn != nullptr);
+
+        gcc_mark_for_deletion(gconn, chat->tcp_conn, GC_EXIT_TYPE_SELF_DISCONNECTED, nullptr, 0);
+    }
+
+    if (is_public_chat(chat)) {
+        kill_group_friend_connection(c, chat);
+
+        if (!m_create_group_connection(c->messenger, chat)) {
+            LOGGER_WARNING(chat->log, "Failed to create new messenger connection for group");
+            return -1;
+        }
+
+        chat->update_self_announces = true;
+    }
+
+    chat->connection_state = CS_CONNECTING;
+
+    return 0;
+}
+
 int gc_group_join(GC_Session *c, const uint8_t *chat_id, const uint8_t *nick, size_t nick_length, const uint8_t *passwd,
                   uint16_t passwd_len)
 {
-    if (chat_id == nullptr || group_exists(c, chat_id) || getfriend_id(c->messenger, chat_id) != -1) {
+    if (chat_id == nullptr) {
         return -2;
     }
 
@@ -7746,6 +7788,18 @@ int gc_group_join(GC_Session *c, const uint8_t *chat_id, const uint8_t *nick, si
 
     if (nick == nullptr || nick_length == 0) {
         return -4;
+    }
+
+    GC_Chat *existing_group = gc_get_group_by_public_key(c, chat_id);
+
+    // If we're already in the group we try to reconnect to it
+    if (existing_group != nullptr) {
+        const int ret = gc_rejoin_group(c, existing_group, passwd, passwd_len);
+        return ret != 0 ? -6 : ret;
+    }
+
+    if (getfriend_id(c->messenger, chat_id) != -1) {
+        return -2;
     }
 
     const int group_number = create_new_group(c, nick, nick_length, false, GI_PUBLIC);
@@ -7804,41 +7858,6 @@ bool gc_disconnect_from_group(const GC_Session *c, GC_Chat *chat)
     }
 
     return true;
-}
-
-int gc_rejoin_group(GC_Session *c, GC_Chat *chat)
-{
-    if (c == nullptr || chat == nullptr) {
-        return -1;
-    }
-
-    chat->time_connected = 0;
-
-    if (group_can_handle_packets(chat)) {
-        send_gc_self_exit(chat, nullptr, 0);
-    }
-
-    for (uint32_t i = 1; i < chat->numpeers; ++i) {
-        GC_Connection *gconn = get_gc_connection(chat, i);
-        assert(gconn != nullptr);
-
-        gcc_mark_for_deletion(gconn, chat->tcp_conn, GC_EXIT_TYPE_SELF_DISCONNECTED, nullptr, 0);
-    }
-
-    if (is_public_chat(chat)) {
-        kill_group_friend_connection(c, chat);
-
-        if (!m_create_group_connection(c->messenger, chat)) {
-            LOGGER_WARNING(chat->log, "Failed to create new messenger connection for group");
-            return -2;
-        }
-
-        chat->update_self_announces = true;
-    }
-
-    chat->connection_state = CS_CONNECTING;
-
-    return 0;
 }
 
 bool group_not_added(const GC_Session *c, const uint8_t *chat_id, uint32_t length)

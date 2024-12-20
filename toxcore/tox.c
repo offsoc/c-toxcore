@@ -3249,7 +3249,7 @@ bool tox_group_reconnect(Tox *tox, uint32_t group_number, Tox_Err_Group_Reconnec
         return false;
     }
 
-    const int ret = gc_rejoin_group(tox->m->group_handler, chat);
+    const int ret = gc_rejoin_group(tox->m->group_handler, chat, nullptr, 0);
     tox_unlock(tox);
 
     switch (ret) {
