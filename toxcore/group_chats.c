@@ -8428,19 +8428,7 @@ GC_Chat *gc_get_group_by_public_key(const GC_Session *c, const uint8_t *public_k
 /** Return True if chat_id exists in the session chat array */
 static bool group_exists(const GC_Session *c, const uint8_t *chat_id)
 {
-    for (uint32_t i = 0; i < c->chats_index; ++i) {
-        const GC_Chat *chat = &c->chats[i];
-
-        if (chat->connection_state == CS_NONE) {
-            continue;
-        }
-
-        if (memcmp(get_chat_id(&chat->chat_public_key), chat_id, CHAT_ID_SIZE) == 0) {
-            return true;
-        }
-    }
-
-    return false;
+    return gc_get_group_by_public_key(c, chat_id) != nullptr;
 }
 
 /** Creates a new 32-byte session encryption keypair and puts the results in `public_key` and `secret_key`. */
