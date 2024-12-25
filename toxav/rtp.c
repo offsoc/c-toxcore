@@ -780,8 +780,8 @@ static void rtp_send_piece(const Logger *log, Tox *tox, uint32_t friend_number, 
 
     if (error != TOX_ERR_FRIEND_CUSTOM_PACKET_OK) {
         char *netstrerror = net_new_strerror(net_error());
-        LOGGER_WARNING(log, "RTP send failed (len: %d)! tox error: %d, net error: %s",
-                       length + RTP_HEADER_SIZE + 1, error, netstrerror);
+        LOGGER_WARNING(log, "RTP send failed (len: %d)! tox error: %s, net error: %s",
+                       length + RTP_HEADER_SIZE + 1, tox_err_friend_custom_packet_to_string(error), netstrerror);
         net_kill_strerror(netstrerror);
     }
 }
