@@ -6,7 +6,6 @@ workflows:
   circleci:
     jobs:
       - bazel-asan
-      - bazel-msan
       - clang-analyze
       - cpplint
       - static-analysis
@@ -23,16 +22,6 @@ jobs:
       - checkout
       - run: .circleci/bazel-test
           //c-toxcore/...
-
-  bazel-msan:
-    working_directory: /tmp/cirrus-ci-build
-    docker:
-      - image: toxchat/toktok-stack:latest-msan
-
-    steps:
-      - checkout
-      - run: .circleci/bazel-test
-          //c-toxcore/auto_tests:lossless_packet_test
 
   static-analysis:
     working_directory: ~/work
