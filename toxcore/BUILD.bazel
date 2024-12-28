@@ -4,6 +4,8 @@ load("@rules_fuzzing//fuzzing:cc_defs.bzl", "cc_fuzz_test")
 exports_files(
     srcs = [
         "tox.h",
+        "tox_dispatch.h",
+        "tox_events.h",
         "tox_private.h",
     ],
     visibility = ["//c-toxcore:__subpackages__"],
