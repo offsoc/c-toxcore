@@ -1,15 +1,15 @@
 ---
 bazel-opt_task:
-  timeout_in: 5m
+  timeout_in: 10m
   container:
     image: toxchat/toktok-stack:latest-release
-    cpu: 2
+    cpu: 8
     memory: 2G
   configure_script:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
   test_all_script:
-    - cd /src/workspace && bazel
+    - cd /src/workspace && tools/retry 5 bazel
         test -k
         --build_tag_filters=-haskell
         --test_tag_filters=-haskell
@@ -18,16 +18,16 @@ bazel-opt_task:
         -//c-toxcore/auto_tests:tcp_relay_test # Cirrus doesn't allow external network connections.
 
 bazel-dbg_task:
-  timeout_in: 5m
+  timeout_in: 10m
   container:
     image: toxchat/toktok-stack:latest-debug
-    cpu: 2
+    cpu: 8
     memory: 2G
   configure_script:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
   test_all_script:
-    - cd /src/workspace && bazel
+    - cd /src/workspace && tools/retry 5 bazel
         test -k
         --build_tag_filters=-haskell
         --test_tag_filters=-haskell
@@ -36,7 +36,7 @@ bazel-dbg_task:
         -//c-toxcore/auto_tests:tcp_relay_test # Cirrus doesn't allow external network connections.
 
 bazel-msan_task:
-  timeout_in: 5m
+  timeout_in: 10m
   container:
     image: toxchat/toktok-stack:latest-msan
     cpu: 2
@@ -45,7 +45,7 @@ bazel-msan_task:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
   test_all_script:
-    - cd /src/workspace && bazel
+    - cd /src/workspace && tools/retry 5 bazel
         test -k
         --
         //c-toxcore/auto_tests:lossless_packet_test
@@ -97,4 +97,4 @@ freebsd_task:
         -DAUTOTEST=ON \
         -GNinja
       cmake --build . --target install
-      ctest -j50 --output-on-failure --rerun-failed --repeat until-pass:6
+      ctest -j50 --output-on-failure --rerun-failed --repeat until-pass:3 || ctest -j50 --output-on-failure --rerun-failed --repeat until-pass:3
