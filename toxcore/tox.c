@@ -33,7 +33,7 @@
 #include "onion_client.h"
 #include "state.h"
 #include "tox_private.h"
-#include "tox_struct.h"
+#include "tox_struct.h" // IWYU pragma: keep
 #include "util.h"
 
 #include "../toxencryptsave/defines.h"
