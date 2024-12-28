@@ -20,6 +20,10 @@
 #include "onion_announce.h"
 #include "timed_auth.h"
 
+static_assert(TIMED_AUTH_SIZE <= ONION_ANNOUNCE_REQUEST_MAX_SIZE,
+              "Timed auth does not fit into the onion packet");
+static_assert(PACKED_NODE_SIZE_IP6 <= GCA_ANNOUNCE_MAX_SIZE,
+              "IP6 does not fit into the GC_Announce");
 static_assert(GCA_ANNOUNCE_MAX_SIZE <= ONION_MAX_EXTRA_DATA_SIZE,
               "GC_Announce does not fit into the onion packet extra data");
 
