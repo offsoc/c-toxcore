@@ -145,7 +145,10 @@ static bool is_little_endian(void)
 // cppcheck-suppress constParameter
 int main(int argc, char *argv[])
 {
-    char base_path[4096] = {0};
+    const size_t base_path_size = 4096;
+    char *base_path = (char *)malloc(base_path_size);
+    ck_assert(base_path != nullptr);
+    memset(base_path, 0, 4096);
 
     if (argc <= 1) {
         const char *srcdir = getenv("srcdir");
@@ -154,21 +157,29 @@ int main(int argc, char *argv[])
             srcdir = ".";
         }
 
-        snprintf(base_path, sizeof(base_path), "%s", srcdir);
+        snprintf(base_path, base_path_size, "%s", srcdir);
     } else {
-        snprintf(base_path, sizeof(base_path), "%s", argv[1]);
+        snprintf(base_path, base_path_size, "%s", argv[1]);
         base_path[strrchr(base_path, '/') - base_path] = '\0';
     }
 
     if (is_little_endian()) {
-        char save_path[4096 + sizeof(LOADED_SAVE_FILE_LITTLE)];
-        snprintf(save_path, sizeof(save_path), "%s/%s", base_path, LOADED_SAVE_FILE_LITTLE);
+        const size_t save_path_size = 4096 + sizeof(LOADED_SAVE_FILE_LITTLE);
+        char *save_path = (char *)malloc(save_path_size);
+        ck_assert(save_path != nullptr);
+        snprintf(save_path, save_path_size, "%s/%s", base_path, LOADED_SAVE_FILE_LITTLE);
         test_save_compatibility(save_path);
+        free(save_path);
     } else {
-        char save_path[4096 + sizeof(LOADED_SAVE_FILE_BIG)];
-        snprintf(save_path, sizeof(save_path), "%s/%s", base_path, LOADED_SAVE_FILE_BIG);
+        const size_t save_path_size = 4096 + sizeof(LOADED_SAVE_FILE_BIG);
+        char *save_path = (char *)malloc(save_path_size);
+        ck_assert(save_path != nullptr);
+        snprintf(save_path, save_path_size, "%s/%s", base_path, LOADED_SAVE_FILE_BIG);
         test_save_compatibility(save_path);
+        free(save_path);
     }
+
+    free(base_path);
 
     return 0;
 }

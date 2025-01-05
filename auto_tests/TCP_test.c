@@ -165,7 +165,9 @@ static void test_basic(void)
     }
 
     // Receiving the second response and verifying its validity
-    uint8_t packet_resp[4096];
+    const size_t max_packet_size = 4096;
+    uint8_t *packet_resp = (uint8_t *)malloc(max_packet_size);
+    ck_assert(packet_resp != nullptr);
     int recv_data_len = net_recv(ns, logger, sock, packet_resp, 2 + 2 + CRYPTO_PUBLIC_KEY_SIZE + CRYPTO_MAC_SIZE, &localhost);
     ck_assert_msg(recv_data_len == 2 + 2 + CRYPTO_PUBLIC_KEY_SIZE + CRYPTO_MAC_SIZE,
                   "Failed to receive server response to request. %d", recv_data_len);
@@ -173,7 +175,8 @@ static void test_basic(void)
     ck_assert_msg(net_ntohs(size) == 2 + CRYPTO_PUBLIC_KEY_SIZE + CRYPTO_MAC_SIZE,
                   "Wrong packet size for request response.");
 
-    uint8_t packet_resp_plain[4096];
+    uint8_t *packet_resp_plain = (uint8_t *)malloc(max_packet_size);
+    ck_assert(packet_resp_plain != nullptr);
     ret = decrypt_data_symmetric(mem, f_shared_key, f_nonce_r, packet_resp + 2, recv_data_len - 2, packet_resp_plain);
     ck_assert_msg(ret != -1, "Failed to decrypt the TCP server's response.");
     increment_nonce(f_nonce_r);
@@ -182,6 +185,9 @@ static void test_basic(void)
                   packet_resp_plain[0]);
     ck_assert_msg(packet_resp_plain[1] == 0, "Server did not refuse the connection.");
     ck_assert_msg(pk_equal(packet_resp_plain + 2, f_public_key), "Server sent the wrong public key.");
+
+    free(packet_resp_plain);
+    free(packet_resp);
 
     // Closing connections.
     kill_sock(ns, sock);
@@ -337,7 +343,8 @@ static void test_some(void)
     do_tcp_server_delay(tcp_s, mono_time, 50);
 
     // Testing response from connection 1
-    uint8_t data[2048];
+    const size_t max_packet_size = 4096;
+    uint8_t *data = (uint8_t *)malloc(max_packet_size);
     int len = read_packet_sec_tcp(logger, con1, data, 2 + 1 + 1 + CRYPTO_PUBLIC_KEY_SIZE + CRYPTO_MAC_SIZE);
     ck_assert_msg(len == 1 + 1 + CRYPTO_PUBLIC_KEY_SIZE, "Wrong response packet length of %d.", len);
     ck_assert_msg(data[0] == TCP_PACKET_ROUTING_RESPONSE, "Wrong response packet id of %d.", data[0]);
@@ -351,7 +358,7 @@ static void test_some(void)
     ck_assert_msg(data[1] == 16, "Server didn't refuse connection using wrong public key.");
     ck_assert_msg(pk_equal(data + 2, con1->public_key), "Key in response packet wrong.");
 
-    uint8_t test_packet[512] = {16, 17, 16, 86, 99, 127, 255, 189, 78}; // What is this packet????
+    const uint8_t test_packet[512] = {16, 17, 16, 86, 99, 127, 255, 189, 78}; // What is this packet????
 
     write_packet_tcp_test_connection(logger, con3, test_packet, sizeof(test_packet));
     write_packet_tcp_test_connection(logger, con3, test_packet, sizeof(test_packet));
@@ -405,6 +412,8 @@ static void test_some(void)
     ck_assert_msg(len == sizeof(ping_packet), "wrong len %d", len);
     ck_assert_msg(data[0] == TCP_PACKET_PONG, "wrong packet id %u", data[0]);
     ck_assert_msg(memcmp(ping_packet + 1, data + 1, sizeof(uint64_t)) == 0, "wrong packet data");
+
+    free(data);
 
     // Kill off the connections
     kill_tcp_server(tcp_s);
