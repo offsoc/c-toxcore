@@ -1,5 +1,4 @@
 /** Auto Tests: basic network profile functionality test (UDP only)
- * TODO(JFreegman): test TCP packets as well
  */
 
 #include <inttypes.h>
@@ -110,10 +109,24 @@ int main(void)
 {
     setvbuf(stdout, nullptr, _IONBF, 0);
 
+    Tox_Err_Options_New options_err;
+    struct Tox_Options *tox_opts = tox_options_new(&options_err);
+
+    ck_assert_msg(options_err == TOX_ERR_OPTIONS_NEW_OK, "Failed to initialize tox options: %d\n", options_err);
+
+    tox_options_default(tox_opts);
+    tox_options_set_udp_enabled(tox_opts, true);
+
     Run_Auto_Options autotox_opts = default_run_auto_options();
     autotox_opts.graph = GRAPH_COMPLETE;
 
-    run_auto_test(nullptr, NUM_TOXES, test_netprof, 0, &autotox_opts);
+    run_auto_test(tox_opts, NUM_TOXES, test_netprof, 0, &autotox_opts);
+
+    // TODO(Jfreegman): uncomment this when TCP autotests are fixed
+    // tox_options_set_udp_enabled(tox_opts, false);
+    // run_auto_test(tox_opts, NUM_TOXES, test_netprof, 0, &autotox_opts);
+
+    tox_options_free(tox_opts);
 
     return 0;
 }
