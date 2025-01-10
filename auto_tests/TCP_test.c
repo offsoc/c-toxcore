@@ -8,7 +8,6 @@
 #include "../toxcore/TCP_server.h"
 #include "../toxcore/crypto_core.h"
 #include "../toxcore/mono_time.h"
-#include "../toxcore/util.h"
 #include "auto_test_support.h"
 
 #define NUM_PORTS 3
@@ -534,6 +533,7 @@ static void test_client(void)
     ip_port_tcp_s.ip = get_loopback();
 
     TCP_Client_Connection *conn = new_tcp_connection(logger, mem, mono_time, rng, ns, &ip_port_tcp_s, self_public_key, f_public_key, f_secret_key, nullptr);
+    ck_assert_msg(conn != nullptr, "Failed to create a TCP client connection.");
     // TCP sockets might need a moment before they can be written to.
     c_sleep(50);
     do_tcp_connection(logger, mono_time, conn, nullptr);
@@ -570,6 +570,7 @@ static void test_client(void)
     ip_port_tcp_s.port = net_htons(ports[random_u32(rng) % NUM_PORTS]);
     TCP_Client_Connection *conn2 = new_tcp_connection(logger, mem, mono_time, rng, ns, &ip_port_tcp_s, self_public_key, f2_public_key,
                                    f2_secret_key, nullptr);
+    ck_assert_msg(conn2 != nullptr, "Failed to create a second TCP client connection.");
     c_sleep(50);
 
     // The client should call this function (defined earlier) during the routing process.
@@ -667,6 +668,7 @@ static void test_client_invalid(void)
     ip_port_tcp_s.ip = get_loopback();
     TCP_Client_Connection *conn = new_tcp_connection(logger, mem, mono_time, rng, ns, &ip_port_tcp_s,
                                   self_public_key, f_public_key, f_secret_key, nullptr);
+    ck_assert_msg(conn != nullptr, "Failed to create a TCP client connection.");
 
     // Run the client's main loop but not the server.
     mono_time_update(mono_time);
@@ -743,10 +745,12 @@ static void test_tcp_connection(void)
     proxy_info.proxy_type = TCP_PROXY_NONE;
     crypto_new_keypair(rng, self_public_key, self_secret_key);
     TCP_Connections *tc_1 = new_tcp_connections(logger, mem, rng, ns, mono_time, self_secret_key, &proxy_info);
+    ck_assert_msg(tc_1 != nullptr, "Failed to create TCP connections");
     ck_assert_msg(pk_equal(tcp_connections_public_key(tc_1), self_public_key), "Wrong public key");
 
     crypto_new_keypair(rng, self_public_key, self_secret_key);
     TCP_Connections *tc_2 = new_tcp_connections(logger, mem, rng, ns, mono_time, self_secret_key, &proxy_info);
+    ck_assert_msg(tc_2 != nullptr, "Failed to create TCP connections");
     ck_assert_msg(pk_equal(tcp_connections_public_key(tc_2), self_public_key), "Wrong public key");
 
     IP_Port ip_port_tcp_s;
@@ -858,10 +862,12 @@ static void test_tcp_connection2(void)
     proxy_info.proxy_type = TCP_PROXY_NONE;
     crypto_new_keypair(rng, self_public_key, self_secret_key);
     TCP_Connections *tc_1 = new_tcp_connections(logger, mem, rng, ns, mono_time, self_secret_key, &proxy_info);
+    ck_assert_msg(tc_1 != nullptr, "Failed to create TCP connections");
     ck_assert_msg(pk_equal(tcp_connections_public_key(tc_1), self_public_key), "Wrong public key");
 
     crypto_new_keypair(rng, self_public_key, self_secret_key);
     TCP_Connections *tc_2 = new_tcp_connections(logger, mem, rng, ns, mono_time, self_secret_key, &proxy_info);
+    ck_assert_msg(tc_2 != nullptr, "Failed to create TCP connections");
     ck_assert_msg(pk_equal(tcp_connections_public_key(tc_2), self_public_key), "Wrong public key");
 
     IP_Port ip_port_tcp_s;

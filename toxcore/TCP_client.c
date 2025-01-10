@@ -591,6 +591,7 @@ TCP_Client_Connection *new_tcp_connection(
     assert(ns != nullptr);
 
     if (!net_family_is_ipv4(ip_port->ip.family) && !net_family_is_ipv6(ip_port->ip.family)) {
+        LOGGER_ERROR(logger, "Invalid IP family: %d", ip_port->ip.family.value);
         return nullptr;
     }
 
@@ -609,15 +610,26 @@ TCP_Client_Connection *new_tcp_connection(
     const Socket sock = net_socket(ns, family, TOX_SOCK_STREAM, TOX_PROTO_TCP);
 
     if (!sock_valid(sock)) {
+        LOGGER_ERROR(logger, "Failed to create TCP socket with family %d", family.value);
         return nullptr;
     }
 
     if (!set_socket_nosigpipe(ns, sock)) {
+        LOGGER_ERROR(logger, "Failed to set TCP socket to ignore SIGPIPE");
         kill_sock(ns, sock);
         return nullptr;
     }
 
-    if (!(set_socket_nonblock(ns, sock) && connect_sock_to(ns, logger, mem, sock, ip_port, proxy_info))) {
+    if (!set_socket_nonblock(ns, sock)) {
+        LOGGER_ERROR(logger, "Failed to set TCP socket to non-blocking");
+        kill_sock(ns, sock);
+        return nullptr;
+    }
+
+    if (!connect_sock_to(ns, logger, mem, sock, ip_port, proxy_info)) {
+        Ip_Ntoa ip_ntoa;
+        LOGGER_WARNING(logger, "Failed to connect TCP socket to %s:%u",
+                       net_ip_ntoa(&ip_port->ip, &ip_ntoa), net_ntohs(ip_port->port));
         kill_sock(ns, sock);
         return nullptr;
     }
@@ -625,6 +637,7 @@ TCP_Client_Connection *new_tcp_connection(
     TCP_Client_Connection *temp = (TCP_Client_Connection *)mem_alloc(mem, sizeof(TCP_Client_Connection));
 
     if (temp == nullptr) {
+        LOGGER_ERROR(logger, "Failed to allocate memory for TCP_Client_Connection");
         kill_sock(ns, sock);
         return nullptr;
     }
@@ -657,6 +670,7 @@ TCP_Client_Connection *new_tcp_connection(
             temp->status = TCP_CLIENT_CONNECTING;
 
             if (generate_handshake(temp) == -1) {
+                LOGGER_ERROR(logger, "Failed to generate handshake");
                 kill_sock(ns, sock);
                 mem_delete(mem, temp);
                 return nullptr;

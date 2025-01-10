@@ -8,7 +8,6 @@ bazel-opt_task:
   configure_script:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
-    - cat /src/workspace/.bazelrc.local
   test_all_script:
     - cd /src/workspace && bazel
         test -k
@@ -27,11 +26,9 @@ bazel-dbg_task:
   configure_script:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
-    - cat /src/workspace/.bazelrc.local
   test_all_script:
     - cd /src/workspace && bazel
         test -k
-        --remote_cache=http://$CIRRUS_HTTP_CACHE_HOST
         --build_tag_filters=-haskell
         --test_tag_filters=-haskell
         --
@@ -47,11 +44,9 @@ bazel-msan_task:
   configure_script:
     - git submodule update --init --recursive
     - /src/workspace/tools/inject-repo c-toxcore
-    - cat /src/workspace/.bazelrc.local
   test_all_script:
     - cd /src/workspace && bazel
         test -k
-        --remote_cache=http://$CIRRUS_HTTP_CACHE_HOST
         --
         //c-toxcore/auto_tests:lossless_packet_test
 
@@ -85,6 +80,7 @@ freebsd_task:
         libconfig
         libsodium
         libvpx
+        ninja
         opus
         pkgconf
     - git submodule update --init --recursive
@@ -98,6 +94,7 @@ freebsd_task:
         -DNON_HERMETIC_TESTS=OFF \
         -DTEST_TIMEOUT_SECONDS=50 \
         -DUSE_IPV6=OFF \
-        -DAUTOTEST=ON
+        -DAUTOTEST=ON \
+        -GNinja
       cmake --build . --target install
       ctest -j50 --output-on-failure --rerun-failed --repeat until-pass:6
