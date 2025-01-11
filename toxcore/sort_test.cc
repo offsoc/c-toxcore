@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>  // generate, sort
 #include <limits>
 #include <random>
 
