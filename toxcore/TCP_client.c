@@ -109,11 +109,23 @@ void tcp_con_set_custom_uint(TCP_Client_Connection *con, uint32_t value)
 non_null()
 static bool connect_sock_to(const Network *ns, const Logger *logger, const Memory *mem, Socket sock, const IP_Port *ip_port, const TCP_Proxy_Info *proxy_info)
 {
+    Net_Err_Connect err;
     if (proxy_info->proxy_type != TCP_PROXY_NONE) {
-        return net_connect(ns, mem, logger, sock, &proxy_info->ip_port);
+        net_connect(ns, mem, logger, sock, &proxy_info->ip_port, &err);
     } else {
-        return net_connect(ns, mem, logger, sock, ip_port);
+        net_connect(ns, mem, logger, sock, ip_port, &err);
     }
+    switch (err) {
+        case NET_ERR_CONNECT_OK:
+        case NET_ERR_CONNECT_FAILED: {
+            /* nonblocking socket, connect will never return success */
+            return true;
+        }
+        case NET_ERR_CONNECT_INVALID_FAMILY:
+            return false;
+    }
+    LOGGER_ERROR(logger, "unexpected error code %s from net_connect", net_err_connect_to_string(err));
+    return false;
 }
 
 /**

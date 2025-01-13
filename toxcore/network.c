@@ -2015,7 +2015,21 @@ bool addr_resolve_or_parse_ip(const Network *ns, const Memory *mem, const char *
     return addr_parse_ip(address, to);
 }
 
-bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket sock, const IP_Port *ip_port)
+const char *net_err_connect_to_string(Net_Err_Connect err)
+{
+    switch (err) {
+        case NET_ERR_CONNECT_OK:
+            return "NET_ERR_CONNECT_OK";
+        case NET_ERR_CONNECT_INVALID_FAMILY:
+            return "NET_ERR_CONNECT_INVALID_FAMILY";
+        case NET_ERR_CONNECT_FAILED:
+            return "NET_ERR_CONNECT_FAILED";
+    }
+
+    return "<invalid Net_Err_Connect>";
+}
+
+bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket sock, const IP_Port *ip_port, Net_Err_Connect *err)
 {
     Network_Addr addr = {{0}};
 
@@ -2037,11 +2051,13 @@ bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket
         Ip_Ntoa ip_str;
         LOGGER_ERROR(log, "cannot connect to %s:%d which is neither IPv4 nor IPv6",
                      net_ip_ntoa(&ip_port->ip, &ip_str), net_ntohs(ip_port->port));
+        *err = NET_ERR_CONNECT_INVALID_FAMILY;
         return false;
     }
 
 #ifdef FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION
     if ((true)) {
+        *err = NET_ERR_CONNECT_OK;
         return true;
     }
 #endif /* FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION */
@@ -2060,10 +2076,12 @@ bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket
             LOGGER_WARNING(log, "failed to connect to %s:%d: %d (%s)",
                            net_ip_ntoa(&ip_port->ip, &ip_str), net_ntohs(ip_port->port), error, net_strerror);
             net_kill_strerror(net_strerror);
+            *err = NET_ERR_CONNECT_FAILED;
             return false;
         }
     }
 
+    *err = NET_ERR_CONNECT_OK;
     return true;
 }
 

@@ -499,13 +499,22 @@ void networking_registerhandler(Networking_Core *net, uint8_t byte, packet_handl
 non_null(1) nullable(2)
 void networking_poll(const Networking_Core *net, void *userdata);
 
+typedef enum Net_Err_Connect {
+    NET_ERR_CONNECT_OK,
+    NET_ERR_CONNECT_INVALID_FAMILY,
+    NET_ERR_CONNECT_FAILED,
+} Net_Err_Connect;
+
+const char *net_err_connect_to_string(Net_Err_Connect err);
+
 /** @brief Connect a socket to the address specified by the ip_port.
  *
- * Return true on success.
- * Return false on failure.
+ * @param[out] err Set to NET_ERR_CONNECT_OK on success, otherwise an error code.
+ *
+ * @retval true on success, false on failure.
  */
 non_null()
-bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket sock, const IP_Port *ip_port);
+bool net_connect(const Network *ns, const Memory *mem, const Logger *log, Socket sock, const IP_Port *ip_port, Net_Err_Connect *err);
 
 /** @brief High-level getaddrinfo implementation.
  *
