@@ -511,6 +511,11 @@ static int handle_announce_request_common(
     uint8_t ping_id_data[CRYPTO_PUBLIC_KEY_SIZE + SIZE_IPPORT];
     memcpy(ping_id_data, packet_public_key, CRYPTO_PUBLIC_KEY_SIZE);
     const int packed_len = pack_ip_port(onion_a->log, &ping_id_data[CRYPTO_PUBLIC_KEY_SIZE], SIZE_IPPORT, source);
+    if (packed_len < 0) {
+        LOGGER_ERROR(onion_a->log, "failed to pack IP/Port");
+        mem_delete(onion_a->mem, plain);
+        return 1;
+    }
     assert(packed_len <= SIZE_IPPORT);
     memzero(&ping_id_data[CRYPTO_PUBLIC_KEY_SIZE + packed_len], SIZE_IPPORT - packed_len);
     const uint8_t *data_public_key = plain + ONION_PING_ID_SIZE + CRYPTO_PUBLIC_KEY_SIZE;

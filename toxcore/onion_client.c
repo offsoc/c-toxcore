@@ -580,6 +580,11 @@ static int new_sendback(Onion_Client *onion_c, uint32_t num, const uint8_t *publ
     memcpy(data, &num, sizeof(uint32_t));
     memcpy(&data[sizeof(uint32_t)], public_key, CRYPTO_PUBLIC_KEY_SIZE);
     const int packed_len = pack_ip_port(onion_c->logger, &data[sizeof(uint32_t) + CRYPTO_PUBLIC_KEY_SIZE], SIZE_IPPORT, ip_port);
+    if (packed_len < 0) {
+        LOGGER_ERROR(onion_c->logger, "failed to pack IP/port");
+        return -1;
+    }
+    assert(packed_len <= SIZE_IPPORT);
     memzero(&data[sizeof(uint32_t) + CRYPTO_PUBLIC_KEY_SIZE + packed_len], SIZE_IPPORT - packed_len);
     memcpy(&data[sizeof(uint32_t) + CRYPTO_PUBLIC_KEY_SIZE + SIZE_IPPORT], &path_num, sizeof(uint32_t));
     *sendback = ping_array_add(onion_c->announce_ping_array, onion_c->mono_time, onion_c->rng, data, sizeof(data));
