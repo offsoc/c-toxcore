@@ -115,7 +115,7 @@ static bool resize(BS_List *list, uint32_t new_size)
         return true;
     }
 
-    uint8_t *data = (uint8_t *)mem_vrealloc(list->mem, list->data, list->element_size, new_size);
+    uint8_t *data = (uint8_t *)mem_brealloc(list->mem, list->data, new_size * list->element_size);
 
     if (data == nullptr) {
         return false;

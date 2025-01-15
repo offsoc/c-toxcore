@@ -823,7 +823,7 @@ static struct RTPHeader rtp_default_header(const RTPSession *session, uint32_t l
     header.ma = 0;
     header.pt = session->payload_type % 128;
     header.sequnum = session->sequnum;
-    Mono_Time *mt = toxav_get_av_mono_time(session->toxav);
+    const Mono_Time *mt = toxav_get_av_mono_time(session->toxav);
     if (mt != nullptr) {
         header.timestamp = current_time_monotonic(mt);
     } else {

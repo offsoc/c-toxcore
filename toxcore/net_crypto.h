@@ -9,10 +9,7 @@
 #ifndef C_TOXCORE_TOXCORE_NET_CRYPTO_H
 #define C_TOXCORE_TOXCORE_NET_CRYPTO_H
 
-#include <pthread.h>
-
 #include "DHT.h"
-#include "LAN_discovery.h"
 #include "TCP_client.h"
 #include "TCP_connection.h"
 #include "attributes.h"
@@ -242,7 +239,7 @@ uint32_t crypto_num_free_sendqueue_slots(const Net_Crypto *c, int crypt_connecti
  * @retval 0 if it wasn't reached.
  */
 non_null()
-bool max_speed_reached(Net_Crypto *c, int crypt_connection_id);
+bool max_speed_reached(const Net_Crypto *c, int crypt_connection_id);
 
 /** @brief Sends a lossless cryptopacket.
  *
@@ -254,7 +251,7 @@ bool max_speed_reached(Net_Crypto *c, int crypt_connection_id);
  * congestion_control: should congestion control apply to this packet?
  */
 non_null()
-int64_t write_cryptpacket(Net_Crypto *c, int crypt_connection_id,
+int64_t write_cryptpacket(const Net_Crypto *c, int crypt_connection_id,
                           const uint8_t *data, uint16_t length, bool congestion_control);
 
 /** @brief Check if packet_number was received by the other side.
@@ -282,7 +279,7 @@ int cryptpacket_received(const Net_Crypto *c, int crypt_connection_id, uint32_t 
  * The first byte of data must be in the PACKET_ID_RANGE_LOSSY.
  */
 non_null()
-int send_lossy_cryptpacket(Net_Crypto *c, int crypt_connection_id, const uint8_t *data, uint16_t length);
+int send_lossy_cryptpacket(const Net_Crypto *c, int crypt_connection_id, const uint8_t *data, uint16_t length);
 
 /** @brief Add a tcp relay, associating it to a crypt_connection_id.
  *

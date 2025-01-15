@@ -46,6 +46,14 @@ const Memory *os_memory(void);
 non_null() void *mem_balloc(const Memory *mem, uint32_t size);
 
 /**
+ * @brief Resize an array of a given size for built-in types.
+ *
+ * If used for a type other than byte-sized types, `size` needs to be manually
+ * multiplied by the element size.
+ */
+non_null(1) nullable(2) void *mem_brealloc(const Memory *mem, void *ptr, uint32_t size);
+
+/**
  * @brief Allocate a single object.
  *
  * Always use as `(T *)mem_alloc(mem, sizeof(T))`.

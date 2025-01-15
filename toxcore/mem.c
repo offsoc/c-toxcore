@@ -53,6 +53,12 @@ void *mem_balloc(const Memory *mem, uint32_t size)
     return ptr;
 }
 
+void *mem_brealloc(const Memory *mem, void *ptr, uint32_t size)
+{
+    void *const new_ptr = mem->funcs->realloc(mem->obj, ptr, size);
+    return new_ptr;
+}
+
 void *mem_alloc(const Memory *mem, uint32_t size)
 {
     void *const ptr = mem->funcs->calloc(mem->obj, 1, size);

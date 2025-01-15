@@ -929,7 +929,7 @@ static Tox *tox_new_system(const struct Tox_Options *options, Tox_Err_New *error
         return nullptr;
     }
 
-    tox->m->conferences_object = new_groupchats(tox->mono_time, tox->m);
+    tox->m->conferences_object = new_groupchats(tox->mono_time, sys->mem, tox->m);
 
     if (tox->m->conferences_object == nullptr) {
         kill_messenger(tox->m);
