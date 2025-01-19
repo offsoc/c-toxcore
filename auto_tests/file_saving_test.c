@@ -13,11 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../testing/misc_tools.h"
-#include "../toxcore/ccompat.h"
 #include "auto_test_support.h"
 #include "check_compat.h"
 
+#include "../toxcore/ccompat.h"
+#include "../toxcore/tox.h"
 #include "../toxencryptsave/toxencryptsave.h"
 
 static const char *pphrase = "bar";
@@ -27,21 +27,26 @@ static const char *savefile = "./save";
 static void save_data_encrypted(void)
 {
     struct Tox_Options *options = tox_options_new(nullptr);
+    ck_assert(options != nullptr);
     Tox *t = tox_new_log(options, nullptr, nullptr);
+    ck_assert(t != nullptr);
     tox_options_free(options);
 
     tox_self_set_name(t, (const uint8_t *)name, strlen(name), nullptr);
 
     FILE *f = fopen(savefile, "wb");
+    ck_assert(f != nullptr);
 
     size_t size = tox_get_savedata_size(t);
     uint8_t *clear = (uint8_t *)malloc(size);
+    ck_assert(clear != nullptr);
 
     /*this function does not write any data at all*/
     tox_get_savedata(t, clear);
 
     size += TOX_PASS_ENCRYPTION_EXTRA_LENGTH;
     uint8_t *cipher = (uint8_t *)malloc(size);
+    ck_assert(cipher != nullptr);
 
     Tox_Err_Encryption eerr;
 
@@ -78,7 +83,7 @@ static void load_data_decrypted(void)
     Tox_Err_Decryption derr;
 
     ck_assert_msg(tox_pass_decrypt(cipher, size, (const uint8_t *)pphrase, strlen(pphrase), clear, &derr),
-                  "Could not decrypt, error code %d.", derr);
+                  "Could not decrypt, error code %s.", tox_err_decryption_to_string(derr));
 
     struct Tox_Options *options = tox_options_new(nullptr);
     ck_assert(options != nullptr);
@@ -90,10 +95,9 @@ static void load_data_decrypted(void)
     Tox_Err_New err;
 
     Tox *t = tox_new_log(options, &err, nullptr);
+    ck_assert_msg(t != nullptr, "tox_new returned the error value %s", tox_err_new_to_string(err));
 
     tox_options_free(options);
-
-    ck_assert_msg(t != nullptr, "tox_new returned the error value %d", err);
 
     uint8_t *readname = (uint8_t *)malloc(tox_self_get_name_size(t));
     ck_assert(readname != nullptr);
