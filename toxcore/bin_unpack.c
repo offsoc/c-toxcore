@@ -125,6 +125,10 @@ bool bin_unpack_bin(Bin_Unpack *bu, uint8_t **data_ptr, uint32_t *data_length_pt
     }
     uint8_t *const data = (uint8_t *)mem_balloc(bu->mem, bin_size);
 
+    if (data == nullptr) {
+        return false;
+    }
+
     if (!bin_unpack_bin_b(bu, data, bin_size)) {
         mem_delete(bu->mem, data);
         return false;
