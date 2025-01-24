@@ -348,10 +348,14 @@ set(toxcore_SOURCES
   toxcore/tox_events.c
   toxcore/tox_events.h
   toxcore/tox.h
+  toxcore/tox_options.c
+  toxcore/tox_options.h
   toxcore/tox_private.c
   toxcore/tox_private.h
   toxcore/tox_pack.c
   toxcore/tox_pack.h
+  toxcore/tox_types.c
+  toxcore/tox_types.h
   toxcore/tox_unpack.c
   toxcore/tox_unpack.h
   toxcore/util.c
@@ -369,8 +373,10 @@ endif()
 set(toxcore_PKGCONFIG_REQUIRES ${toxcore_PKGCONFIG_REQUIRES} libsodium)
 set(toxcore_API_HEADERS
   ${toxcore_SOURCE_DIR}/toxcore/tox.h^tox
+  ${toxcore_SOURCE_DIR}/toxcore/tox_dispatch.h^tox
   ${toxcore_SOURCE_DIR}/toxcore/tox_events.h^tox
-  ${toxcore_SOURCE_DIR}/toxcore/tox_dispatch.h^tox)
+  ${toxcore_SOURCE_DIR}/toxcore/tox_options.h^tox
+  ${toxcore_SOURCE_DIR}/toxcore/tox_types.h^tox)
 if(EXPERIMENTAL_API)
   set(toxcore_API_HEADERS ${toxcore_API_HEADERS}
     ${toxcore_SOURCE_DIR}/toxcore/tox_private.h^tox)

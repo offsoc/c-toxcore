@@ -9,9 +9,9 @@
 #include <pthread.h>
 
 #include "Messenger.h"
-#include "mem.h"
 #include "mono_time.h"
 #include "tox.h"
+#include "tox_options.h" // tox_log_cb
 #include "tox_private.h"
 
 #ifdef __cplusplus

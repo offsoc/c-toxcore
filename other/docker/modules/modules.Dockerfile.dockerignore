@@ -21,4 +21,5 @@
 !other/pkgconfig/*
 !other/rpm/*
 !so.version
-!other/docker/pkgsrc/pkgsrc.patch
+!other/docker/modules/check
+!**/BUILD.bazel

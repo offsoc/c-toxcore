@@ -126,6 +126,7 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
+      - run: /src/workspace/tools/inject-repo c-toxcore
       - run: cd /src/workspace &&
           bazel test
             -k
