@@ -12,7 +12,6 @@
 
 #include "DHT.h"
 #include "TCP_server.h"
-#include "attributes.h"
 #include "ccompat.h"
 #include "crypto_core.h"
 #include "group_chats.h"
@@ -23,7 +22,7 @@
 #include "net_profile.h"
 #include "network.h"
 #include "tox.h"
-#include "tox_struct.h"
+#include "tox_struct.h"  // IWYU pragma: keep
 
 #define SET_ERROR_PARAMETER(param, x) \
     do {                              \

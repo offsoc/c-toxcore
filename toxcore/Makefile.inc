@@ -2,8 +2,7 @@ lib_LTLIBRARIES += libtoxcore.la
 
 libtoxcore_la_include_HEADERS = \
                         ../toxcore/tox.h \
-                        ../toxcore/tox_options.h \
-                        ../toxcore/tox_types.h
+                        ../toxcore/tox_options.h
 
 libtoxcore_la_includedir = $(includedir)/tox
 
@@ -145,8 +144,6 @@ libtoxcore_la_SOURCES = ../third_party/cmp/cmp.c \
                         ../toxcore/tox_private.c \
                         ../toxcore/tox_private.h \
                         ../toxcore/tox_struct.h \
-                        ../toxcore/tox_types.c \
-                        ../toxcore/tox_types.h \
                         ../toxcore/tox_unpack.c \
                         ../toxcore/tox_unpack.h \
                         ../toxcore/tox.c \

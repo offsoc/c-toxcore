@@ -12,7 +12,6 @@ genrule(
         "//c-toxcore/toxcore:tox_events.h",
         "//c-toxcore/toxcore:tox_options.h",
         "//c-toxcore/toxcore:tox_private.h",
-        "//c-toxcore/toxcore:tox_types.h",
         "//c-toxcore/toxencryptsave:toxencryptsave.h",
     ],
     outs = [
@@ -22,7 +21,6 @@ genrule(
         "tox/tox_events.h",
         "tox/tox_options.h",
         "tox/tox_private.h",
-        "tox/tox_types.h",
         "tox/toxencryptsave.h",
     ],
     cmd = """
@@ -32,7 +30,6 @@ genrule(
         cp $(location //c-toxcore/toxcore:tox_events.h) $(GENDIR)/c-toxcore/tox/tox_events.h
         cp $(location //c-toxcore/toxcore:tox_options.h) $(GENDIR)/c-toxcore/tox/tox_options.h
         cp $(location //c-toxcore/toxcore:tox_private.h) $(GENDIR)/c-toxcore/tox/tox_private.h
-        cp $(location //c-toxcore/toxcore:tox_types.h) $(GENDIR)/c-toxcore/tox/tox_types.h
         cp $(location //c-toxcore/toxencryptsave:toxencryptsave.h) $(GENDIR)/c-toxcore/tox/toxencryptsave.h
     """,
     visibility = ["//visibility:public"],

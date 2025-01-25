@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "tox.h"
-#include "tox_types.h"
+#include "tox_options.h"
 
 #ifdef __cplusplus
 extern "C" {

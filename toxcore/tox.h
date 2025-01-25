@@ -103,7 +103,6 @@
 #include <stdint.h>
 
 #include "tox_options.h"  // IWYU pragma: export
-#include "tox_types.h"  // IWYU pragma: export
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,7 +119,7 @@ extern "C" {
  * device is limited. Note that this is not just a per-process limit, since the
  * limiting factor is the number of usable ports on a device.
  */
-struct Tox;
+typedef struct Tox Tox;
 
 /** @{
  * @name API version

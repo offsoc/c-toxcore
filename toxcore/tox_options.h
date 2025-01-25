@@ -10,11 +10,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "tox_types.h"  // IWYU pragma: export
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct Tox;
 
 /** @{
  * @name Startup options
@@ -117,8 +117,9 @@ const char *tox_log_level_to_string(Tox_Log_Level value);
  * @param message The log message.
  * @param user_data The user data pointer passed to tox_new in options.
  */
-typedef void tox_log_cb(Tox *tox, Tox_Log_Level level, const char *file, uint32_t line,
-                        const char *func, const char *message, void *user_data);
+typedef void tox_log_cb(struct Tox *tox, Tox_Log_Level level, const char *file,
+                        uint32_t line, const char *func, const char *message,
+                        void *user_data);
 
 /**
  * @brief This struct contains all the startup options for Tox.
@@ -135,7 +136,7 @@ typedef void tox_log_cb(Tox *tox, Tox_Log_Level level, const char *file, uint32_
  *   members. The struct will become opaque (i.e. the definition will become
  *   private) in v0.3.0.
  */
-struct Tox_Options;
+typedef struct Tox_Options Tox_Options;
 
 #ifndef TOX_HIDE_DEPRECATED
 struct Tox_Options {
