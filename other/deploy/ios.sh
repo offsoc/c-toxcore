@@ -4,17 +4,24 @@ set -eux -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-"$SCRIPT_DIR/deps.sh" ios
+ARCH="$1"
+"$SCRIPT_DIR/deps.sh" ios "$ARCH"
 
 export PKG_CONFIG_PATH="$PWD/prefix/lib/pkgconfig"
 
-IOS_FLAGS="-miphoneos-version-min=10.0 -arch arm64"
+IOS_FLAGS="-miphoneos-version-min=10.0 -arch $ARCH"
+
+if [ "$ARCH" = "i386" ] || [ "$ARCH" = "x86_64" ]; then
+  XC_SDK="iphonesimulator"
+else
+  XC_SDK="iphoneos"
+fi
 
 # Build for iOS 10
 cmake \
   -B _build \
   -G Ninja \
-  -DCMAKE_INSTALL_PREFIX="$PWD/toxcore-ios-$(uname -m)" \
+  -DCMAKE_INSTALL_PREFIX="$PWD/toxcore-ios-$ARCH" \
   -DCMAKE_BUILD_TYPE=Release \
   -DENABLE_STATIC=OFF \
   -DENABLE_SHARED=ON \
@@ -28,7 +35,8 @@ cmake \
   -DCMAKE_CXX_FLAGS="$IOS_FLAGS" \
   -DCMAKE_EXE_LINKER_FLAGS="$IOS_FLAGS" \
   -DCMAKE_SHARED_LINKER_FLAGS="$IOS_FLAGS" \
-  -DCMAKE_OSX_SYSROOT="$(xcrun --sdk iphoneos --show-sdk-path)"
+  -DCMAKE_OSX_SYSROOT="$(xcrun --sdk "$XC_SDK" --show-sdk-path)" \
+  -DCMAKE_OSX_ARCHITECTURES="$ARCH"
 
 cmake --build _build
 cmake --install _build

@@ -4,7 +4,8 @@ set -eux -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-"$SCRIPT_DIR/deps.sh" linux
+ARCH="$1"
+"$SCRIPT_DIR/deps.sh" linux "$ARCH"
 
 export PKG_CONFIG_PATH="$PWD/prefix/lib/pkgconfig"
 
@@ -12,7 +13,7 @@ export PKG_CONFIG_PATH="$PWD/prefix/lib/pkgconfig"
 cmake \
   -B _build \
   -G Ninja \
-  -DCMAKE_INSTALL_PREFIX="$PWD/toxcore-linux-$(uname -m)" \
+  -DCMAKE_INSTALL_PREFIX="$PWD/toxcore-linux-$ARCH" \
   -DCMAKE_BUILD_TYPE=Release \
   -DENABLE_STATIC=OFF \
   -DENABLE_SHARED=ON \

@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 git clone --depth=1 https://github.com/TokTok/dockerfiles "$SCRIPT_DIR/dockerfiles"
 
 SYSTEM="$1"
-ARCH="$(uname -m)"
+ARCH="$2"
 
 DEP_PREFIX="$PWD/prefix"
 

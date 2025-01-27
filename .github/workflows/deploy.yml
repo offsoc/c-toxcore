@@ -54,7 +54,7 @@ jobs:
           path: prefix
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
-        run: other/deploy/linux.sh
+        run: other/deploy/linux.sh "${{ matrix.arch }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -116,7 +116,7 @@ jobs:
           path: prefix
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
-        run: other/deploy/macos.sh
+        run: other/deploy/macos.sh "${{ matrix.arch }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -164,7 +164,7 @@ jobs:
     needs: [update-nightly-tag]
     strategy:
       matrix:
-        arch: [arm64]
+        arch: [arm64, armv7, armv7s, i386, x86_64]
     runs-on: 'macos-14'
     steps:
       - uses: actions/checkout@v4
@@ -178,7 +178,7 @@ jobs:
           path: prefix
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
-        run: other/deploy/ios.sh
+        run: other/deploy/ios.sh "${{ matrix.arch }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
