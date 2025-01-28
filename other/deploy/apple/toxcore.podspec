@@ -19,6 +19,6 @@ Pod::Spec.new do |s|
   s.vendored_frameworks = 'Tox.xcframework'
   s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '"${PODS_ROOT}"' }
   s.test_spec 'Tests' do |test_spec|
-    test_spec.source_files = 'smoketest.c'
+    test_spec.source_files = 'smoke-test.c'
   end
 end

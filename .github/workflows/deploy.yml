@@ -217,6 +217,73 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-${{ matrix.target }}.tar.gz,toxcore-nightly-${{ matrix.target }}.tar.gz.sha256"
 
+  build-xcode-framework:
+    name: Xcode Framework
+    needs: [build-ios, build-macos]
+    runs-on: 'macos-14'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Download artifact for ios
+        uses: actions/download-artifact@v4
+        with:
+          pattern: toxcore-ios-*
+      - name: Download artifact for iphonesimulator
+        uses: actions/download-artifact@v4
+        with:
+          pattern: toxcore-iphonesimulator-*
+      - name: Download artifact for macos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: toxcore-macos-*
+      - name: Run build
+        run: |
+          mv toxcore-* other/deploy/apple/
+          other/deploy/apple/make-framework.sh
+          tar -C other/deploy/apple -zcf toxcore-xcframework.tar.gz Tox.xcframework
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: toxcore-xcframework
+          path: toxcore-xcframework.tar.gz
+      - name: Get tag name for release file name
+        if: contains(github.ref, 'refs/tags/v')
+        id: get_version
+        run: |
+          VERSION="$(echo "$GITHUB_REF" | cut -d / -f 3)"
+          echo "release_tarball=toxcore-$VERSION-xcframework.tar.gz" >>$GITHUB_OUTPUT
+      - name: Create tarball for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp toxcore-xcframework.tar.gz "${{ steps.get_version.outputs.release_tarball }}"
+          sha256sum "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
+      - name: Create tarball for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp toxcore-xcframework.tar.gz toxcore-nightly-xcframework.tar.gz
+          sha256sum toxcore-nightly-xcframework.tar.gz > toxcore-nightly-xcframework.tar.gz.sha256
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "toxcore-nightly-xcframework.tar.gz,toxcore-nightly-xcframework.tar.gz.sha256"
+
   build-android:
     name: Android
     needs: [update-nightly-tag]
