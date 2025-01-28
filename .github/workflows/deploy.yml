@@ -51,7 +51,7 @@ jobs:
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: prefix
+          path: deps-prefix-linux-${{ matrix.arch }}
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
         run: other/deploy/linux.sh "${{ matrix.arch }}"
@@ -108,12 +108,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install build tools
-        run: brew install coreutils ninja yasm
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: prefix
+          path: deps-prefix-macos-${{ matrix.arch }}
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
         run: other/deploy/macos.sh "${{ matrix.arch }}"
@@ -164,36 +162,34 @@ jobs:
     needs: [update-nightly-tag]
     strategy:
       matrix:
-        arch: [arm64, armv7, armv7s, i386, x86_64]
+        target: [ios-arm64, ios-armv7, ios-armv7s, iphonesimulator-arm64, iphonesimulator-x86_64]
     runs-on: 'macos-14'
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install build tools
-        run: brew install coreutils ninja yasm
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: prefix
-          key: ${{ github.job }}-${{ matrix.arch }}-deps
+          path: deps-prefix-${{ matrix.target }}
+          key: ${{ github.job }}-${{ matrix.target }}-deps
       - name: Run build
-        run: other/deploy/ios.sh "${{ matrix.arch }}"
+        run: other/deploy/ios.sh "${{ matrix.target }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: toxcore-ios-${{ matrix.arch }}
-          path: toxcore-ios-${{ matrix.arch }}
+          name: toxcore-${{ matrix.target }}
+          path: toxcore-${{ matrix.target }}
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
         run: |
           VERSION="$(echo "$GITHUB_REF" | cut -d / -f 3)"
-          echo "release_tarball=toxcore-$VERSION-ios-${{ matrix.arch }}.tar.gz" >>$GITHUB_OUTPUT
+          echo "release_tarball=toxcore-$VERSION-${{ matrix.target }}.tar.gz" >>$GITHUB_OUTPUT
       - name: Create tarball for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-ios-${{ matrix.arch }}
+          tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-${{ matrix.target }}
           sha256sum "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
@@ -206,8 +202,8 @@ jobs:
       - name: Create tarball for nightly upload
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          tar zcf toxcore-nightly-ios-${{ matrix.arch }}.tar.gz toxcore-ios-${{ matrix.arch }}
-          sha256sum toxcore-nightly-ios-${{ matrix.arch }}.tar.gz > toxcore-nightly-ios-${{ matrix.arch }}.tar.gz.sha256
+          tar zcf toxcore-nightly-${{ matrix.target }}.tar.gz toxcore-${{ matrix.target }}
+          sha256sum toxcore-nightly-${{ matrix.target }}.tar.gz > toxcore-nightly-${{ matrix.target }}.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -219,7 +215,7 @@ jobs:
           prerelease: true
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "toxcore-nightly-ios-${{ matrix.arch }}.tar.gz,toxcore-nightly-ios-${{ matrix.arch }}.tar.gz.sha256"
+          artifacts: "toxcore-nightly-${{ matrix.target }}.tar.gz,toxcore-nightly-${{ matrix.target }}.tar.gz.sha256"
 
   build-android:
     name: Android
@@ -232,12 +228,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install build tools
-        run: sudo apt-get install -y --no-install-recommends ninja-build yasm
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
-          path: prefix
+          path: deps-prefix-android-${{ matrix.arch }}
           key: ${{ github.job }}-${{ matrix.arch }}-deps
       - name: Run build
         run: other/deploy/android.sh "${{ matrix.arch }}"

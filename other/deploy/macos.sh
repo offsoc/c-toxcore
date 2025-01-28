@@ -4,10 +4,14 @@ set -eux -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+if [ -n "${CI-}" ]; then
+  brew install coreutils ninja yasm
+fi
+
 ARCH="$1"
 "$SCRIPT_DIR/deps.sh" macos "$ARCH"
 
-export PKG_CONFIG_PATH="$PWD/prefix/lib/pkgconfig"
+export PKG_CONFIG_PATH="$PWD/deps-prefix-macos-$ARCH/lib/pkgconfig"
 
 # Build for macOS
 cmake \
