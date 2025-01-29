@@ -431,7 +431,7 @@ int unpack_nodes(Node_format *nodes, uint16_t max_num_nodes, uint16_t *processed
         const int ipp_size = unpack_ip_port(&nodes[num].ip_port, data + len_processed, length - len_processed, tcp_enabled);
 
         if (ipp_size == -1) {
-            return -1;
+            break;
         }
 
         len_processed += ipp_size;
@@ -448,6 +448,10 @@ int unpack_nodes(Node_format *nodes, uint16_t max_num_nodes, uint16_t *processed
         const uint32_t increment = ipp_size + CRYPTO_PUBLIC_KEY_SIZE;
         assert(increment == PACKED_NODE_SIZE_IP4 || increment == PACKED_NODE_SIZE_IP6);
 #endif /* NDEBUG */
+    }
+
+    if (num == 0 && max_num_nodes > 0 && length > 0) {
+        return -1;
     }
 
     if (processed_data_len != nullptr) {
