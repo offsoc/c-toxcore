@@ -70,7 +70,7 @@ jobs:
         if: contains(github.ref, 'refs/tags/v')
         run: |
           tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-linux-${{ matrix.arch }}
-          sha256sum "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+          sha256sum "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -80,10 +80,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           tar zcf toxcore-nightly-linux-${{ matrix.arch }}.tar.gz toxcore-linux-${{ matrix.arch }}
-          sha256sum toxcore-nightly-linux-${{ matrix.arch }}.tar.gz > toxcore-nightly-linux-${{ matrix.arch }}.tar.gz.sha256
+          sha256sum toxcore-nightly-linux-${{ matrix.arch }}.tar.gz >toxcore-nightly-linux-${{ matrix.arch }}.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -130,7 +129,7 @@ jobs:
         if: contains(github.ref, 'refs/tags/v')
         run: |
           tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-macos-${{ matrix.arch }}
-          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -140,10 +139,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           tar zcf toxcore-nightly-macos-${{ matrix.arch }}.tar.gz toxcore-macos-${{ matrix.arch }}
-          shasum -a 256 toxcore-nightly-macos-${{ matrix.arch }}.tar.gz > toxcore-nightly-macos-${{ matrix.arch }}.tar.gz.sha256
+          shasum -a 256 toxcore-nightly-macos-${{ matrix.arch }}.tar.gz >toxcore-nightly-macos-${{ matrix.arch }}.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -190,7 +188,7 @@ jobs:
         if: contains(github.ref, 'refs/tags/v')
         run: |
           tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-${{ matrix.target }}
-          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -200,10 +198,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           tar zcf toxcore-nightly-${{ matrix.target }}.tar.gz toxcore-${{ matrix.target }}
-          shasum -a 256 toxcore-nightly-${{ matrix.target }}.tar.gz > toxcore-nightly-${{ matrix.target }}.tar.gz.sha256
+          shasum -a 256 toxcore-nightly-${{ matrix.target }}.tar.gz >toxcore-nightly-${{ matrix.target }}.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -242,11 +239,12 @@ jobs:
           mv toxcore-* other/deploy/apple/
           other/deploy/apple/make-framework.sh
           tar -C other/deploy/apple -zcf toxcore-xcframework.tar.gz Tox.xcframework
+          shasum -a 256 toxcore-xcframework.tar.gz >toxcore-xcframework.tar.gz.sha256
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: toxcore-xcframework
-          path: toxcore-xcframework.tar.gz
+          path: Tox.xcframework
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -256,8 +254,8 @@ jobs:
       - name: Create tarball for release upload
         if: contains(github.ref, 'refs/tags/v')
         run: |
-          cp toxcore-xcframework.tar.gz "${{ steps.get_version.outputs.release_tarball }}"
-          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+          cp toxcore-xcframework.tar.gz        "${{ steps.get_version.outputs.release_tarball }}"
+          cp toxcore-xcframework.tar.gz.sha256 "${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -267,9 +265,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
-          cp toxcore-xcframework.tar.gz toxcore-nightly-xcframework.tar.gz
+          cp toxcore-xcframework.tar.gz        toxcore-nightly-xcframework.tar.gz
           cp toxcore-xcframework.tar.gz.sha256 toxcore-nightly-xcframework.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
@@ -317,7 +314,7 @@ jobs:
         if: contains(github.ref, 'refs/tags/v')
         run: |
           tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-android-${{ matrix.arch }}
-          sha256sum "${{ steps.get_version.outputs.release_tarball }}" > "${{ steps.get_version.outputs.release_tarball }}.sha256"
+          sha256sum "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Upload to versioned release
         if: contains(github.ref, 'refs/tags/v')
         uses: ncipollo/release-action@v1
@@ -327,10 +324,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           tar zcf toxcore-nightly-android-${{ matrix.arch }}.tar.gz toxcore-android-${{ matrix.arch }}
-          sha256sum toxcore-nightly-android-${{ matrix.arch }}.tar.gz > toxcore-nightly-android-${{ matrix.arch }}.tar.gz.sha256
+          sha256sum toxcore-nightly-android-${{ matrix.arch }}.tar.gz >toxcore-nightly-android-${{ matrix.arch }}.tar.gz.sha256
       - name: Upload to nightly release
         uses: ncipollo/release-action@v1
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
