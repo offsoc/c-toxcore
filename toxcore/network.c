@@ -264,9 +264,11 @@ static int make_family(Family tox_family)
 {
     switch (tox_family.value) {
         case TOX_AF_INET:
+        case TCP_INET:
             return AF_INET;
 
         case TOX_AF_INET6:
+        case TCP_INET6:
             return AF_INET6;
 
         case TOX_AF_UNSPEC:
@@ -1878,14 +1880,14 @@ bool ip_parse_addr(const IP *ip, char *address, size_t length)
         return false;
     }
 
-    if (net_family_is_ipv4(ip->family)) {
+    if (net_family_is_ipv4(ip->family) || net_family_is_tcp_ipv4(ip->family)) {
         struct in_addr addr;
         assert(make_family(ip->family) == AF_INET);
         fill_addr4(&ip->ip.v4, &addr);
         return inet_ntop4(&addr, address, length) != nullptr;
     }
 
-    if (net_family_is_ipv6(ip->family)) {
+    if (net_family_is_ipv6(ip->family) || net_family_is_tcp_ipv6(ip->family)) {
         struct in6_addr addr;
         assert(make_family(ip->family) == AF_INET6);
         fill_addr6(&ip->ip.v6, &addr);
