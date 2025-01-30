@@ -996,9 +996,8 @@ static Toxav_Err_Send_Frame send_frames(const ToxAV *av, ToxAVCall *call)
                             is_keyframe);
 
         if (res < 0) {
-            char *netstrerror = net_new_strerror(av->mem, net_error());
-            LOGGER_WARNING(av->log, "Could not send video frame: %s", netstrerror);
-            net_kill_strerror(av->mem, netstrerror);
+            Net_Strerror error_str;
+            LOGGER_WARNING(av->log, "Could not send video frame: %s", net_strerror(net_error(), &error_str));
             return TOXAV_ERR_SEND_FRAME_RTP_FAILED;
         }
     }
