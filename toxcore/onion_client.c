@@ -470,6 +470,7 @@ static int random_path(const Onion_Client *onion_c, Onion_Client_Paths *onion_pa
 
             onion_paths->paths[pathnum].path_num = path_num;
         } else {
+            assert(0 <= n && n < NUMBER_ONION_PATHS);
             pathnum = n;
         }
     }
