@@ -20,7 +20,7 @@
 #   test_all_script:
 #     - |
 #       # TODO(iphydf): Investigate FreeBSD failures on these tests.
-#       sed -Ei -e '/\(dht_getnodes_api\)/s/^/#/' auto_tests/CMakeLists.txt
+#       sed -Ei -e '/\(dht_nodes_request_api\)/s/^/#/' auto_tests/CMakeLists.txt
 #       cmake . \
 #         -DMIN_LOGGER_LEVEL=TRACE \
 #         -DMUST_BUILD_TOXAV=ON \
