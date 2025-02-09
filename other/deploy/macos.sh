@@ -13,9 +13,11 @@ ARCH="$1"
 
 export PKG_CONFIG_PATH="$PWD/deps-prefix-macos-$ARCH/lib/pkgconfig"
 
+BUILD_DIR="_build-macos-$ARCH"
+
 # Build for macOS
 cmake \
-  -B _build \
+  -B "$BUILD_DIR" \
   -G Ninja \
   -DCMAKE_INSTALL_PREFIX="$PWD/toxcore-macos-$ARCH" \
   -DCMAKE_BUILD_TYPE=Release \
@@ -25,9 +27,10 @@ cmake \
   -DDHT_BOOTSTRAP=OFF \
   -DBOOTSTRAP_DAEMON=OFF \
   -DUNITTEST=OFF \
+  -DSTRICT_ABI=ON \
   -DMIN_LOGGER_LEVEL=TRACE \
   -DEXPERIMENTAL_API=ON \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15
 
-cmake --build _build
-cmake --install _build
+cmake --build "$BUILD_DIR"
+cmake --install "$BUILD_DIR"

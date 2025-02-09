@@ -95,6 +95,7 @@ cmake -B _build -G Ninja \
   -DDHT_BOOTSTRAP=OFF \
   -DBOOTSTRAP_DAEMON=OFF \
   -DUNITTEST=OFF \
+  -DSTRICT_ABI=ON \
   -DMIN_LOGGER_LEVEL=TRACE \
   -DEXPERIMENTAL_API=ON
 cmake --build _build
