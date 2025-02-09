@@ -339,3 +339,68 @@ jobs:
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-android-${{ matrix.arch }}.tar.gz,toxcore-nightly-android-${{ matrix.arch }}.tar.gz.sha256"
+
+  build-wasm:
+    name: WebAssembly
+    needs: [update-nightly-tag]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          file: other/docker/wasm/wasm.Dockerfile
+          push: ${{ github.event_name == 'push' }}
+          tags: toxchat/c-toxcore:wasm
+          cache-from: type=registry,ref=toxchat/c-toxcore:wasm
+          cache-to: type=inline
+          outputs: type=docker
+      - name: Extract wasm build
+        run: docker run --rm --entrypoint tar toxchat/c-toxcore:wasm -C /wasm/bin -c libtoxcore.js libtoxcore.wasm >toxcore-wasm.tar
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: toxcore-wasm.tar
+          path: toxcore-wasm.tar
+      - name: Compress tarball
+        run: gzip toxcore-wasm.tar
+      - name: Get tag name for release file name
+        if: contains(github.ref, 'refs/tags/v')
+        id: get_version
+        run: |
+          VERSION="$(echo "$GITHUB_REF" | cut -d / -f 3)"
+          echo "release_tarball=toxcore-$VERSION-wasm.tar.gz" >>$GITHUB_OUTPUT
+      - name: Create tarball for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp toxcore-wasm.tar.gz "${{ steps.get_version.outputs.release_tarball }}"
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "${{ steps.get_version.outputs.release_tarball }}"
+      - name: Create tarball for nightly upload
+        run: |
+          cp toxcore-wasm.tar.gz toxcore-nightly-wasm.tar.gz
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "toxcore-nightly-wasm.tar.gz"
