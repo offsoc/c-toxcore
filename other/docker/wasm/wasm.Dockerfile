@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 WORKDIR /work/emsdk
 RUN git clone --depth=1 https://github.com/emscripten-core/emsdk /work/emsdk \
- && ./emsdk install 4.0.1 \
- && ./emsdk activate 4.0.1
+ && ./emsdk install 4.0.3 \
+ && ./emsdk activate 4.0.3
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /work
@@ -84,14 +84,13 @@ RUN . "/work/emsdk/emsdk_env.sh" \
 RUN . "/work/emsdk/emsdk_env.sh" \
  && mkdir -p /wasm/bin \
  && emcc -O3 -flto \
- -s ALLOW_UNIMPLEMENTED_SYSCALLS=1 \
  -s EXPORT_NAME=libtoxcore \
- -s IGNORE_MISSING_MAIN=1 \
  -s MAIN_MODULE=1 \
  -s MALLOC=emmalloc \
  -s MODULARIZE=1 \
  -s STRICT=1 \
  -s WEBSOCKET_URL=ws:// \
+ --no-entry \
  /wasm/lib/libopus.a \
  /wasm/lib/libsodium.a \
  /wasm/lib/libvpx.a \
@@ -108,6 +107,7 @@ RUN . "/work/emsdk/emsdk_env.sh" \
  -GNinja \
  -DCMAKE_INSTALL_PREFIX="/wasm" \
  -DCMAKE_C_FLAGS="-O3 -flto -fPIC" \
+ -DCMAKE_UNITY_BUILD=ON \
  -DMUST_BUILD_TOXAV=ON \
  -DENABLE_SHARED=OFF \
  -DBOOTSTRAP_DAEMON=OFF \
@@ -120,16 +120,17 @@ RUN . "/work/emsdk/emsdk_env.sh" \
 RUN . "/work/emsdk/emsdk_env.sh" \
  && mkdir -p /wasm/bin \
  && emcc -O3 -flto \
- -s ALLOW_UNIMPLEMENTED_SYSCALLS=1 \
  -s EXPORT_NAME=libtoxcore \
- -s IGNORE_MISSING_MAIN=1 \
+ -s EXPORTED_RUNTIME_METHODS='["HEAPU8", "wasmExports"]' \
  -s MAIN_MODULE=1 \
  -s MALLOC=emmalloc \
  -s MODULARIZE=1 \
  -s STRICT=1 \
  -s WEBSOCKET_URL=ws:// \
+ --no-entry \
  /wasm/lib/libopus.a \
  /wasm/lib/libsodium.a \
  /wasm/lib/libvpx.a \
  /wasm/lib/libtoxcore.a \
  -o /wasm/bin/libtoxcore.js
+RUN ls -lh /wasm/bin/libtoxcore.js /wasm/bin/libtoxcore.wasm
