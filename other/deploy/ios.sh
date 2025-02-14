@@ -6,12 +6,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 TARGET="$1"
 
+if [ -n "${CI-}" ]; then
+  brew install bash coreutils ninja yasm
+fi
+
 SYSTEM="${TARGET%%-*}"
 ARCH="${TARGET#*-}"
-
-if [ -n "${CI-}" ]; then
-  brew install coreutils ninja yasm
-fi
 
 "$SCRIPT_DIR/deps.sh" "$SYSTEM" "$ARCH"
 
