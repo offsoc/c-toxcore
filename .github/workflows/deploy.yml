@@ -60,6 +60,7 @@ jobs:
         with:
           name: toxcore-linux-${{ matrix.arch }}
           path: toxcore-linux-${{ matrix.arch }}
+          if-no-files-found: error
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -77,7 +78,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
         run: |
@@ -93,7 +93,6 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-linux-${{ matrix.arch }}.tar.gz,toxcore-nightly-linux-${{ matrix.arch }}.tar.gz.sha256"
 
   build-macos:
@@ -119,6 +118,7 @@ jobs:
         with:
           name: toxcore-macos-${{ matrix.arch }}
           path: toxcore-macos-${{ matrix.arch }}
+          if-no-files-found: error
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -136,7 +136,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
         run: |
@@ -152,7 +151,6 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-macos-${{ matrix.arch }}.tar.gz,toxcore-nightly-macos-${{ matrix.arch }}.tar.gz.sha256"
 
   build-ios:
@@ -178,6 +176,7 @@ jobs:
         with:
           name: toxcore-${{ matrix.target }}
           path: toxcore-${{ matrix.target }}
+          if-no-files-found: error
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -195,7 +194,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
         run: |
@@ -211,7 +209,6 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-${{ matrix.target }}.tar.gz,toxcore-nightly-${{ matrix.target }}.tar.gz.sha256"
 
   build-xcode-framework:
@@ -244,7 +241,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: toxcore-xcframework
-          path: Tox.xcframework
+          path: other/deploy/apple/Tox.xcframework
+          if-no-files-found: error
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -262,7 +260,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
         run: |
@@ -278,7 +275,6 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-xcframework.tar.gz,toxcore-nightly-xcframework.tar.gz.sha256"
 
   build-android:
@@ -304,6 +300,7 @@ jobs:
         with:
           name: toxcore-android-${{ matrix.arch }}
           path: toxcore-android-${{ matrix.arch }}
+          if-no-files-found: error
       - name: Get tag name for release file name
         if: contains(github.ref, 'refs/tags/v')
         id: get_version
@@ -321,7 +318,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
       - name: Create tarball for nightly upload
         run: |
@@ -337,7 +333,6 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-android-${{ matrix.arch }}.tar.gz,toxcore-nightly-android-${{ matrix.arch }}.tar.gz.sha256"
 
   build-wasm:
@@ -369,6 +364,7 @@ jobs:
         with:
           name: toxcore-wasm.tar
           path: toxcore-wasm.tar
+          if-no-files-found: error
       - name: Compress tarball
         run: gzip toxcore-wasm.tar
       - name: Get tag name for release file name
@@ -387,7 +383,6 @@ jobs:
         with:
           allowUpdates: true
           draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "${{ steps.get_version.outputs.release_tarball }}"
       - name: Create tarball for nightly upload
         run: |
@@ -402,5 +397,17 @@ jobs:
           omitNameDuringUpdate: true
           prerelease: true
           replacesArtifacts: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "toxcore-nightly-wasm.tar.gz"
+
+  build-single-file:
+    name: Single file
+    needs: [update-nightly-tag]
+    uses: TokTok/ci-tools/.github/workflows/deploy-artifact.yml@master
+    with:
+      project-name: toxcore
+      artifact-source: toxcore-{av,core}.c
+      artifact-versioned: toxcore-$VERSION-{av,core}.c
+      build: single-file
+      run: |
+        other/make_single_file -av >toxcore-av.c
+        other/make_single_file -core >toxcore-core.c
