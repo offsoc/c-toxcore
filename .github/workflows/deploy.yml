@@ -112,39 +112,6 @@ jobs:
           name: toxcore-macos-${{ matrix.arch }}
           path: toxcore-macos-${{ matrix.arch }}
           if-no-files-found: error
-      - name: Get tag name for release file name
-        if: contains(github.ref, 'refs/tags/v')
-        id: get_version
-        run: |
-          VERSION="$(echo "$GITHUB_REF" | cut -d / -f 3)"
-          echo "release_tarball=toxcore-$VERSION-macos-${{ matrix.arch }}.tar.gz" >>$GITHUB_OUTPUT
-      - name: Create tarball for release upload
-        if: contains(github.ref, 'refs/tags/v')
-        run: |
-          tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-macos-${{ matrix.arch }}
-          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
-      - name: Upload to versioned release
-        if: contains(github.ref, 'refs/tags/v')
-        uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          draft: true
-          artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
-      - name: Create tarball for nightly upload
-        run: |
-          tar zcf toxcore-nightly-macos-${{ matrix.arch }}.tar.gz toxcore-macos-${{ matrix.arch }}
-          shasum -a 256 toxcore-nightly-macos-${{ matrix.arch }}.tar.gz >toxcore-nightly-macos-${{ matrix.arch }}.tar.gz.sha256
-      - name: Upload to nightly release
-        uses: ncipollo/release-action@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        with:
-          allowUpdates: true
-          tag: nightly
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          prerelease: true
-          replacesArtifacts: true
-          artifacts: "toxcore-nightly-macos-${{ matrix.arch }}.tar.gz,toxcore-nightly-macos-${{ matrix.arch }}.tar.gz.sha256"
 
   build-ios:
     name: iOS
@@ -170,39 +137,6 @@ jobs:
           name: toxcore-${{ matrix.target }}
           path: toxcore-${{ matrix.target }}
           if-no-files-found: error
-      - name: Get tag name for release file name
-        if: contains(github.ref, 'refs/tags/v')
-        id: get_version
-        run: |
-          VERSION="$(echo "$GITHUB_REF" | cut -d / -f 3)"
-          echo "release_tarball=toxcore-$VERSION-${{ matrix.target }}.tar.gz" >>$GITHUB_OUTPUT
-      - name: Create tarball for release upload
-        if: contains(github.ref, 'refs/tags/v')
-        run: |
-          tar zcf "${{ steps.get_version.outputs.release_tarball }}" toxcore-${{ matrix.target }}
-          shasum -a 256 "${{ steps.get_version.outputs.release_tarball }}" >"${{ steps.get_version.outputs.release_tarball }}.sha256"
-      - name: Upload to versioned release
-        if: contains(github.ref, 'refs/tags/v')
-        uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          draft: true
-          artifacts: "${{ steps.get_version.outputs.release_tarball }},${{ steps.get_version.outputs.release_tarball }}.sha256"
-      - name: Create tarball for nightly upload
-        run: |
-          tar zcf toxcore-nightly-${{ matrix.target }}.tar.gz toxcore-${{ matrix.target }}
-          shasum -a 256 toxcore-nightly-${{ matrix.target }}.tar.gz >toxcore-nightly-${{ matrix.target }}.tar.gz.sha256
-      - name: Upload to nightly release
-        uses: ncipollo/release-action@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        with:
-          allowUpdates: true
-          tag: nightly
-          omitBodyDuringUpdate: true
-          omitNameDuringUpdate: true
-          prerelease: true
-          replacesArtifacts: true
-          artifacts: "toxcore-nightly-${{ matrix.target }}.tar.gz,toxcore-nightly-${{ matrix.target }}.tar.gz.sha256"
 
   build-xcode-framework:
     name: Xcode Framework
@@ -398,12 +332,8 @@ jobs:
     uses: TokTok/ci-tools/.github/workflows/deploy-artifact.yml@master
     with:
       project-name: toxcore
-      artifact-source:
-        other/deploy/single-file/Makefile
-        toxcore-{av,core}.c
-      artifact-versioned:
-        Makefile
-        toxcore-$VERSION-{av,core}.c
+      artifact-source: toxcore-{av,core}.c
+      artifact-versioned: toxcore-$VERSION-{av,core}.c
       build: single-file
       run: |
         other/deploy/single-file/make_single_file -av >toxcore-av.c
