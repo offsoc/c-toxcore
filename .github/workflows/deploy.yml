@@ -20,16 +20,9 @@ jobs:
   # Preparation jobs
   ################################################################################################
 
-  update-nightly-tag:
-    name: Update nightly release tag
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Move nightly tag to head for nightly release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: git tag -f nightly && git push origin nightly -f
+  prepare:
+    name: Prepare
+    uses: TokTok/ci-tools/.github/workflows/deploy-prepare.yml@master
 
   ################################################################################################
   # Build and deploy jobs (PR and push)
@@ -37,7 +30,7 @@ jobs:
 
   build-linux:
     name: Linux
-    needs: [update-nightly-tag]
+    needs: [prepare]
     strategy:
       matrix:
         arch: [aarch64, x86_64]
@@ -97,7 +90,7 @@ jobs:
 
   build-macos:
     name: macOS
-    needs: [update-nightly-tag]
+    needs: [prepare]
     strategy:
       matrix:
         arch: [arm64, x86_64]
@@ -155,7 +148,7 @@ jobs:
 
   build-ios:
     name: iOS
-    needs: [update-nightly-tag]
+    needs: [prepare]
     strategy:
       matrix:
         target: [ios-arm64, ios-armv7, ios-armv7s, iphonesimulator-arm64, iphonesimulator-x86_64]
@@ -279,7 +272,7 @@ jobs:
 
   build-android:
     name: Android
-    needs: [update-nightly-tag]
+    needs: [prepare]
     strategy:
       matrix:
         arch: [armeabi-v7a, arm64-v8a, x86, x86_64]
@@ -337,7 +330,7 @@ jobs:
 
   build-wasm:
     name: WebAssembly
-    needs: [update-nightly-tag]
+    needs: [prepare]
     runs-on: ubuntu-24.04
     steps:
       - name: Set up Docker Buildx
@@ -401,13 +394,17 @@ jobs:
 
   build-single-file:
     name: Single file
-    needs: [update-nightly-tag]
+    needs: [prepare]
     uses: TokTok/ci-tools/.github/workflows/deploy-artifact.yml@master
     with:
       project-name: toxcore
-      artifact-source: toxcore-{av,core}.c
-      artifact-versioned: toxcore-$VERSION-{av,core}.c
+      artifact-source:
+        other/deploy/single-file/Makefile
+        toxcore-{av,core}.c
+      artifact-versioned:
+        Makefile
+        toxcore-$VERSION-{av,core}.c
       build: single-file
       run: |
-        other/make_single_file -av >toxcore-av.c
-        other/make_single_file -core >toxcore-core.c
+        other/deploy/single-file/make_single_file -av >toxcore-av.c
+        other/deploy/single-file/make_single_file -core >toxcore-core.c
