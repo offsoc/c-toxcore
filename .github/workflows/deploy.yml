@@ -338,3 +338,21 @@ jobs:
       run: |
         other/deploy/single-file/make_single_file -av >toxcore-av.c
         other/deploy/single-file/make_single_file -core >toxcore-core.c
+
+  build-tarball:
+    name: Source tarball
+    needs: [prepare]
+    uses: TokTok/ci-tools/.github/workflows/deploy-artifact.yml@master
+    with:
+      project-name: toxcore
+      artifact-source: tox-*.tar.{gz,xz}
+      artifact-versioned: $VERSION.tar.{gz,xz}
+      build: tarball
+      run: |
+        sudo apt-get install -y --no-install-recommends libsodium-dev
+        autoreconf -fi
+        ./configure
+        make dist
+        for f in tox-*.tar.gz; do
+          gunzip -c "$f" | xz -z - >"${f%.gz}.xz"
+        done
