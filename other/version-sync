@@ -25,9 +25,9 @@ update() {
 
 update 'configure.ac' 's/AC_INIT(\[tox\], \[.*\])/AC_INIT([tox], ['"$VER"'])/'
 
-update 'toxcore/tox.api.h' 's/\(const VERSION_MAJOR *= \).*;/\1'"$MAJOR"';/'
-update 'toxcore/tox.api.h' 's/\(const VERSION_MINOR *= \).*;/\1'"$MINOR"';/'
-update 'toxcore/tox.api.h' 's/\(const VERSION_PATCH *= \).*;/\1'"$PATCH"';/'
+update 'toxcore/tox.h' 's/\(#define TOX_VERSION_MAJOR *\).*/\1'"$MAJOR"'/'
+update 'toxcore/tox.h' 's/\(#define TOX_VERSION_MINOR *\).*/\1'"$MINOR"'/'
+update 'toxcore/tox.h' 's/\(#define TOX_VERSION_PATCH *\).*/\1'"$PATCH"'/'
 
 update 'CMakeLists.txt' 's/\(PROJECT_VERSION_MAJOR "\).*"/\1'"$MAJOR"'"/'
 update 'CMakeLists.txt' 's/\(PROJECT_VERSION_MINOR "\).*"/\1'"$MINOR"'"/'
