@@ -33,6 +33,12 @@ update 'CMakeLists.txt' 's/\(PROJECT_VERSION_MAJOR "\).*"/\1'"$MAJOR"'"/'
 update 'CMakeLists.txt' 's/\(PROJECT_VERSION_MINOR "\).*"/\1'"$MINOR"'"/'
 update 'CMakeLists.txt' 's/\(PROJECT_VERSION_PATCH "\).*"/\1'"$PATCH"'"/'
 
+update 'other/docker/pkgsrc/pkgsrc.Dockerfile' 's/\(COPY . \/work\/c-toxcore-\).*/\1'"$VER"'/'
+update 'other/docker/pkgsrc/pkgsrc.Dockerfile' 's/\(tar", "zcf", "c-toxcore.tar.gz", "c-toxcore-\).*/\1'"$VER"'"]/'
+
+update 'other/docker/pkgsrc/pkgsrc.patch' 's/\(+DISTNAME=\ttoxcore-\).*/\1'"$VER"'/'
+update 'other/docker/pkgsrc/pkgsrc.patch' 's/\(+lib\/libtoxcore.so.\).*/\1'"$MINOR.$PATCH.0"'/'
+
 #
 # calculating the SO version
 #
