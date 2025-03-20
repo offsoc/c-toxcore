@@ -555,6 +555,7 @@ cc_fuzz_test(
     deps = [
         ":DHT",
         ":mem_test_util",
+        ":net_profile",
         "//c-toxcore/testing/fuzzing:fuzz_support",
     ],
 )
