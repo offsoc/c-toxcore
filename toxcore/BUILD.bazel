@@ -358,6 +358,10 @@ cc_library(
     name = "net_profile",
     srcs = ["net_profile.c"],
     hdrs = ["net_profile.h"],
+    visibility = [
+        "//c-toxcore/auto_tests:__pkg__",
+        "//c-toxcore/testing/fuzzing:__pkg__",
+    ],
     deps = [
         ":attributes",
         ":ccompat",
