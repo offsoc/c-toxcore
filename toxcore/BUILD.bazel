@@ -786,6 +786,7 @@ cc_fuzz_test(
         ":TCP_client",
         ":mem_test_util",
         ":net_crypto",
+        ":net_profile",
         ":network",
         "//c-toxcore/testing/fuzzing:fuzz_support",
         "//c-toxcore/testing/fuzzing:fuzz_tox",
